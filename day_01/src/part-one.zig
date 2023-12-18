@@ -1,9 +1,10 @@
 const std = @import("std");
 const fs = std.fs;
+const Allocator = std.mem.Allocator;
 
 const MAX_BUFFER_SIZE = 1024 * 4; // 4KBs
 
-pub fn solve(filepath: []const u8, allocator: *const std.mem.Allocator) !u32 {
+pub fn solve(filepath: []const u8, allocator: Allocator) !u32 {
     const file = try fs.cwd().openFile(filepath, .{ .mode = .read_only });
     var buffer = try allocator.alloc(u8, 1024);
     defer {

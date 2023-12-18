@@ -2,6 +2,7 @@ const std = @import("std");
 const fs = std.fs;
 
 const Allocator = std.mem.Allocator;
+const LinkedList = @import("linkedlist.zig").LinkedList;
 
 // String to num map
 // O
@@ -38,111 +39,149 @@ const Allocator = std.mem.Allocator;
 //      └─── N
 //           └─── E
 
-pub fn Node(comptime T: type) type {
-    return struct {
-        const Self = @This();
-
-        num: ?T,
-        next: *[]Self,
-
-        fn dealloc(self: *Self, allocator: Allocator) void {
-            // Deallocate following start_node
-            if (self.next != null) {
-                self.next.len
-                self.next.dealloc(allocator);
-            }
-
-            // Deallocate current start_node
-            allocator.free(self.next);
-            self.* = null;
-        }
-    };
-}
-
+const ALPHABET_SIZE: u8 = 26;
 const NumericTree = struct {
     const Self = @This();
 
-    start_node: *Node(u8),
-    allocator: Allocator,
+    value: ?u8 = null,
+    indices: [ALPHABET_SIZE]?*Self = std.mem.zeroes([ALPHABET_SIZE]?*Self),
 
-    pub fn init(allocator: Allocator) Allocator.Error!Self {
-        var start_node: *Node(u8) = try allocator.create(Node(u8));
-        // start_node.* = .{ .num = null, .next = try allocator.alloc(Node(u8), 26) };
-
+    pub fn init(allocator: Allocator) !Self {
         const words = "one|two|three|four|five|six|seven|eight|nine|";
-        var current_num = 1;
-        var iter = start_node;
-        for (words) |char| {
-            std.debug.print("{c}", .{char});
-            switch (char) {
-                '|' => {
-                    iter.*.num = current_num;
-                    iter = start_node;
-                    current_num += 1;
-                },
-                else => |x| {
-                    iter.*.next = try allocator.alloc(Node(u8), 26);
-                    iter.*.next[x] = try allocator.create(Node(u8));
-                    iter = &(iter.*.next[x]);
-                },
+        var tree: Self = .{ .value = undefined, .indices = std.mem.zeroes([ALPHABET_SIZE]?*Self) };
+
+        var iter: *NumericTree = &tree;
+        var current_num: u8 = 1;
+        for (words) |char| switch (char) {
+            '|' => {
+                iter.*.value = current_num;
+                current_num += 1;
+
+                iter = &tree; // Reset iter
+            },
+            else => {
+                const hs = hash(char);
+                // std.debug.print("{d} | {c}\n", .{ @intFromPtr(iter), char });
+                if (iter.indices[hs] == null) {
+                    var ptr = try allocator.create(NumericTree);
+                    ptr.* = NumericTree{};
+                    iter.*.indices[hs] = ptr;
+                }
+                iter = iter.indices[hs].?;
+            },
+        };
+
+        return tree;
+    }
+
+    fn deinit(self: *Self, allocator: Allocator) void {
+        for (self.indices, 0..) |sub_tree, index| {
+            if (sub_tree) |*tree| {
+                std.debug.print("{c}", .{@as(u8, @intCast(index)) + 'a'});
+                tree.*.*.deinit(allocator); // *.*
+                allocator.destroy(tree.*);
             }
+            self.indices[index] = null;
         }
-
-        return .{ .start_node = start_node, .allocator = allocator };
     }
-
-    fn deinit(self: *Self) void {
-        if (self.start_node == null) return;
-
-        self.start_node.*.dealloc(self.allocator);
-        self.allocator.destroy(self.start_node);
-        self.start_node = null;
-    }
-
-    // build_tree: {
-    // const words = "one|two|three|four|five|six|seven|eight|nine";
-
-    // var result = NumericTree{ .next = [26]NumericTree };
-    // var current_num = 1;
-    // var iter: *NumericTree = &result;
-    // for (words) |char| {
-    //     std.debug.print("{c}", .{char});
-    //     switch (char) {
-    //         '|' => {
-    //             iter.* = NumericTree{ .num = current_num };
-    //             iter = &result;
-    //             current_num += 1;
-    //         },
-    //         else => |x| {
-    //             iter.*.next[x] = NumericTree{ .next = [26]NumericTree };
-    //             iter = iter.*.next[x];
-    //         },
-    //     }
-    // }
-
-    // break :build_tree result;
 };
 
-pub fn solve(filepath: []const u8, comptime allocator: *const Allocator) !u32 {
+pub fn hash(char: u8) u8 {
+    return switch (char) {
+        'A'...'Z' => char - 'A',
+        'a'...'z' => char - 'a',
+        '1'...'9' => char - '0' + 'a',
+        else => unreachable,
+    };
+}
+
+// Create a union type to hold pointer instead of duplicated value
+const TreeOrValue = union(enum) { tree: *NumericTree, value: u8 };
+
+pub fn solve(filepath: []const u8, comptime allocator: Allocator) !u32 {
     const file = try fs.cwd().openFile(filepath, .{ .mode = .read_only });
-    var buffer = try allocator.alloc(u8, 1024);
+    var buffer = try allocator.alloc(u8, 512);
     defer {
         file.close();
         allocator.free(buffer);
     }
 
-    std.debug.print("{d}", .{tree['o']['n']['e']});
+    var tree = try NumericTree.init(allocator);
+    var list = LinkedList(TreeOrValue).init(allocator);
+    defer {
+        tree.deinit(allocator);
+        list.deinit();
+    }
 
     var total: u32 = 0;
     var lead: u8 = 0;
-    _ = lead;
     var tail: u8 = 0;
-    _ = tail;
     while (file.read(buffer)) |max_length| {
-        if (max_length == 0) break;
+        if (max_length == 0) {
+            total += lead * 10 + tail;
+            break;
+        }
+
+        for (buffer[0..max_length]) |char| switch (char) {
+            'a'...'z', 'A'...'Z' => {
+                const hashed = hash(char);
+                std.debug.print("{c} - ", .{char});
+
+                var index: u8 = 0;
+                var iter = list.head;
+                while (iter) |treeOrVal| {
+                    iter = treeOrVal.next;
+                    switch (treeOrVal.value) {
+                        .tree => |node| {
+                            if (node.indices[hashed]) |subTree| {
+                                if (subTree.value) |value| {
+                                    try list.update(index, .{ .value = value });
+                                } else {
+                                    try list.update(index, .{ .tree = subTree });
+                                }
+                                index += 1;
+                            } else {
+                                try list.remove(index);
+                                if (index == list.size) index -= 1;
+                            }
+                        },
+                        .value => |value| {
+                            _ = value;
+                            index += 1;
+                        },
+                    }
+                }
+
+                if (tree.indices[hashed]) |indexedTree| {
+                    try list.insert(list.size, .{ .tree = indexedTree });
+                }
+            },
+            '0'...'9' => {
+                try list.insert(list.size, .{ .value = char - '0' });
+            },
+            '\n' => {
+                var count: u8 = 0;
+                var iter = list.head;
+                while (iter) |node| {
+                    iter = node.next;
+                    switch (node.value) {
+                        .value => |value| {
+                            lead = if (lead == 0) value else lead;
+                            tail = value;
+                        },
+                        .tree => {},
+                    }
+                    count += 1;
+                }
+                std.debug.print("LEAD({d})|TAIL({d})|NUM({d})|COUNT({d})\n", .{ lead, tail, lead * 10 + tail, count });
+                total += (lead * 10) + tail;
+                lead = 0;
+                tail = 0;
+                list.clear();
+            },
+            else => unreachable,
+        };
     } else |err| return err;
 
     return total;
 }
-
-test "build tree" {}
