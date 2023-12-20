@@ -117,7 +117,7 @@ pub fn calcLine(list: *const LinkedList(TreeOrValue)) u7 {
     return lead * 10 + tail;
 }
 
-pub fn solve(filepath: []const u8, comptime allocator: Allocator) !usize {
+pub fn solve(filepath: []const u8, allocator: Allocator) !usize {
     const file = try fs.cwd().openFile(filepath, .{ .mode = .read_only });
     var buffer = try allocator.alloc(u8, 512);
     defer {

@@ -1,6 +1,4 @@
 const std = @import("std");
-const fs = std.fs;
-const linkedlist = @import("linkedlist.zig");
 
 const p1 = @import("part-one.zig");
 const p2 = @import("part-two.zig");
@@ -9,7 +7,7 @@ const MAX_BUFFER_SIZE = 1024 * 10; // 10 Kilobytes
 
 // Create memory allocator
 var buffer: [MAX_BUFFER_SIZE]u8 = undefined;
-var fba = std.heap.FixedBufferAllocator.init(&buffer);
+const fba = std.heap.FixedBufferAllocator.init(&buffer);
 const allocator = fba.allocator();
 
 pub fn main() !void {
@@ -24,6 +22,7 @@ pub fn main() !void {
 
     try stdout.print("Result for part 01: {d}\n", .{try p1.solve(inputPath, allocator)});
     try stdout.print("Result for part 02: {d}\n", .{try p2.solve(inputPath, allocator)});
+
     try bw.flush(); // don't forget to flush!
 }
 

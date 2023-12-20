@@ -42,7 +42,9 @@ Below is the progress tracker for each day of the Advent of Code 2023 event. Eac
 
 ## Comments
 **Day 01**
-- While trying to optimize memory usage in **Day 01** problem, I figured out that the `FixedBufferAllocator` \*did not\* reuse freed memory. Mentioned in [issues#3049](https://github.com/ziglang/zig/issues/3049). That's why I have to expand the memory limit to beable to run on the full data.
+- While trying to optimize memory usage in **Day 01** problem, I figured out that the ~~`FixedBufferAllocator` \*did not\* reuse freed memory~~. Mentioned in [issues#3049](https://github.com/ziglang/zig/issues/3049). That's why I have to expand the memory limit to beable to run on the full data.
+- It's turn out to be that the `FixedBufferAllocator` \*did\* reuse freed memory, but one has to free the memory in the order in which it was allocated from last to first (like a stack). Orelse, the allocator will continue to allocate new memory after the last unfree'd memory. // TODO: Update `LinkedList.remove()`` to always remove & free memory from the last element.
+
 
 
 _Stay tuned for daily updates and solutions._
