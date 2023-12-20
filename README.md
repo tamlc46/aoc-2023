@@ -21,24 +21,24 @@ In order to deepen my understanding of computer architecture, memory management,
 ## Progress Tracking
 Below is the progress tracker for each day of the Advent of Code 2023 event. Each day will be marked as completed once the puzzle is successfully solved.
 
-| Solved | Day | Problem Name | Completion Date | Solved | Day | Problem Name | Completion Date |
-|:------:|:---:|--------------|-----------------|:------:|:---:|--------------|-----------------|
-|  [X]   | 01  | Trebuchet?!  |      2023-20-17 |  [ ]   | 17  |              |                 |
-|  [ ]   | 02  |              |                 |  [ ]   | 18  |              |                 |
-|  [ ]   | 03  |              |                 |  [ ]   | 19  |              |                 |
-|  [ ]   | 04  |              |                 |  [ ]   | 20  |              |                 |
-|  [ ]   | 05  |              |                 |  [ ]   | 21  |              |                 |
-|  [ ]   | 06  |              |                 |  [ ]   | 22  |              |                 |
-|  [ ]   | 07  |              |                 |  [ ]   | 23  |              |                 |
-|  [ ]   | 08  |              |                 |  [ ]   | 24  |              |                 |
-|  [ ]   | 09  |              |                 |  [ ]   | 25  |              |                 |
-|  [ ]   | 10  |              |                 |  [ ]   | 26  |              |                 |
-|  [ ]   | 11  |              |                 |  [ ]   | 27  |              |                 |
-|  [ ]   | 12  |              |                 |  [ ]   | 28  |              |                 |
-|  [ ]   | 13  |              |                 |  [ ]   | 29  |              |                 |
-|  [ ]   | 14  |              |                 |  [ ]   | 30  |              |                 |
-|  [ ]   | 15  |              |                 |  [ ]   | 31  |              |                 |
-|  [ ]   | 16  |              |                 |
+| Solved | Day | Problem Name   | Completion Date | Solved | Day | Problem Name   | Completion Date |
+|:------:|:---:|----------------|-----------------|:------:|:---:|----------------|-----------------|
+|  [X]   | 01  | Trebuchet?!    |      2023-20-17 |  [ ]   | 17  |                |                 |
+|  [ ]   | 02  | Cube Conundrum |                 |  [ ]   | 18  |                |                 |
+|  [ ]   | 03  |                |                 |  [ ]   | 19  |                |                 |
+|  [ ]   | 04  |                |                 |  [ ]   | 20  |                |                 |
+|  [ ]   | 05  |                |                 |  [ ]   | 21  |                |                 |
+|  [ ]   | 06  |                |                 |  [ ]   | 22  |                |                 |
+|  [ ]   | 07  |                |                 |  [ ]   | 23  |                |                 |
+|  [ ]   | 08  |                |                 |  [ ]   | 24  |                |                 |
+|  [ ]   | 09  |                |                 |  [ ]   | 25  |                |                 |
+|  [ ]   | 10  |                |                 |  [ ]   | 26  |                |                 |
+|  [ ]   | 11  |                |                 |  [ ]   | 27  |                |                 |
+|  [ ]   | 12  |                |                 |  [ ]   | 28  |                |                 |
+|  [ ]   | 13  |                |                 |  [ ]   | 29  |                |                 |
+|  [ ]   | 14  |                |                 |  [ ]   | 30  |                |                 |
+|  [ ]   | 15  |                |                 |  [ ]   | 31  |                |                 |
+|  [ ]   | 16  |                |                 |
 
 ## Comments
 **Day 01**
