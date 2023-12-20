@@ -40,5 +40,9 @@ Below is the progress tracker for each day of the Advent of Code 2023 event. Eac
 |  [ ]   | 15  |              |                 |  [ ]   | 31  |              |                 |
 |  [ ]   | 16  |              |                 |
 
+## Comments
+**Day 01**
+- While trying to optimize memory usage in **Day 01** problem, I figured out that the `FixedBufferAllocator` \*did not\* reuse freed memory. Mentioned in [issues#3049](https://github.com/ziglang/zig/issues/3049). That's why I have to expand the memory limit to beable to run on the full data.
+
 
 _Stay tuned for daily updates and solutions._
