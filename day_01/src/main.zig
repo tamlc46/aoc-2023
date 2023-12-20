@@ -5,7 +5,7 @@ const linkedlist = @import("linkedlist.zig");
 const p1 = @import("part-one.zig");
 const p2 = @import("part-two.zig");
 
-const MAX_BUFFER_SIZE = 1024 * 16; // 8 Kilobytes
+const MAX_BUFFER_SIZE = 1024 * 10; // 10 Kilobytes
 
 // Create memory allocator
 var buffer: [MAX_BUFFER_SIZE]u8 = undefined;
@@ -27,39 +27,6 @@ pub fn main() !void {
     try bw.flush(); // don't forget to flush!
 }
 
-// pub fn main() !void {
-//     // stdout is for the actual output of your application, for example if you
-//     // are implementing gzip, then only the compressed bytes should be sent to
-//     // stdout, not any debugging messages.
-//     const stdout_file = std.io.getStdOut().writer();
-//     var bw = std.io.bufferedWriter(stdout_file);
-//     const stdout = bw.writer();
-
-//     var list = linkedlist.LinkedList(u8).init(allocator);
-//     defer list.deinit();
-
-//     try list.insert(0, 15);
-//     try list.insert(0, 5);
-//     try list.insert(2, 20);
-//     try list.insert(1, 10);
-//     try list.insert(3, 18);
-
-//     list.clear();
-//     try list.insert(0, 5);
-//     try list.insert(1, 10);
-//     try list.insert(2, 20);
-//     try list.remove(0);
-
-//     var iter = list.head;
-//     while (iter) |cursor| {
-//         try stdout.print("{d} ", .{cursor.value});
-//         iter = cursor.next;
-//     }
-//     try stdout.print("\n", .{});
-
-//     try bw.flush(); // don't forget to flush!
-// }
-
 test "test part 01 with sample data" {
     const expected: u32 = 142;
     const actual = try p1.solve("input/sample_1.txt", std.testing.allocator);
@@ -68,30 +35,8 @@ test "test part 01 with sample data" {
 }
 
 test "test part 02 with sample data" {
-    const expected: u32 = 142;
+    const expected: usize = 281;
     const actual = try p2.solve("input/sample_2.txt", std.testing.allocator);
 
     try std.testing.expectEqual(expected, actual);
 }
-
-// test "LinkedList" {
-//     var list = linkedlist.LinkedList(u8).init(allocator);
-//     defer list.deinit();
-
-//     try list.insert(0, 15);
-//     try list.insert(0, 5);
-//     try list.insert(2, 20);
-//     try list.insert(1, 10);
-//     try list.insert(3, 18);
-
-//     list.clear();
-//     try list.insert(0, 5);
-//     try list.insert(1, 10);
-//     try list.insert(2, 20);
-
-//     var iter = list.head;
-//     while (iter) |cursor| {
-//         std.debug.print("{d} ", .{cursor.value});
-//         iter = cursor.next;
-//     }
-// }

@@ -23,7 +23,7 @@ Below is the progress tracker for each day of the Advent of Code 2023 event. Eac
 
 | Solved | Day | Problem Name | Completion Date | Solved | Day | Problem Name | Completion Date |
 |:------:|:---:|--------------|-----------------|:------:|:---:|--------------|-----------------|
-|  [ ]   | 01  | Trebuchet?!  |                 |  [ ]   | 17  |              |                 |
+|  [X]   | 01  | Trebuchet?!  |      2023-20-17 |  [ ]   | 17  |              |                 |
 |  [ ]   | 02  |              |                 |  [ ]   | 18  |              |                 |
 |  [ ]   | 03  |              |                 |  [ ]   | 19  |              |                 |
 |  [ ]   | 04  |              |                 |  [ ]   | 20  |              |                 |
@@ -39,5 +39,6 @@ Below is the progress tracker for each day of the Advent of Code 2023 event. Eac
 |  [ ]   | 14  |              |                 |  [ ]   | 30  |              |                 |
 |  [ ]   | 15  |              |                 |  [ ]   | 31  |              |                 |
 |  [ ]   | 16  |              |                 |
+
 
 _Stay tuned for daily updates and solutions._

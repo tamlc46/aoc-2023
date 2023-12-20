@@ -39,11 +39,11 @@ const LinkedList = @import("linkedlist.zig").LinkedList;
 //      └─── N
 //           └─── E
 
-const ALPHABET_SIZE: u8 = 26;
+const ALPHABET_SIZE: u5 = 26;
 const NumericTree = struct {
     const Self = @This();
 
-    value: ?u8 = null,
+    value: ?u4 = null, // Value range (0..16). We only need (1..9)
     indices: [ALPHABET_SIZE]?*Self = std.mem.zeroes([ALPHABET_SIZE]?*Self),
 
     pub fn init(allocator: Allocator) !Self {
@@ -51,7 +51,7 @@ const NumericTree = struct {
         var tree: Self = .{ .value = undefined, .indices = std.mem.zeroes([ALPHABET_SIZE]?*Self) };
 
         var iter: *NumericTree = &tree;
-        var current_num: u8 = 1;
+        var current_num: u4 = 1;
         for (words) |char| switch (char) {
             '|' => {
                 iter.*.value = current_num;
@@ -61,7 +61,6 @@ const NumericTree = struct {
             },
             else => {
                 const hs = hash(char);
-                // std.debug.print("{d} | {c}\n", .{ @intFromPtr(iter), char });
                 if (iter.indices[hs] == null) {
                     var ptr = try allocator.create(NumericTree);
                     ptr.* = NumericTree{};
@@ -77,7 +76,6 @@ const NumericTree = struct {
     fn deinit(self: *Self, allocator: Allocator) void {
         for (self.indices, 0..) |sub_tree, index| {
             if (sub_tree) |*tree| {
-                std.debug.print("{c}", .{@as(u8, @intCast(index)) + 'a'});
                 tree.*.*.deinit(allocator); // *.*
                 allocator.destroy(tree.*);
             }
@@ -90,15 +88,36 @@ pub fn hash(char: u8) u8 {
     return switch (char) {
         'A'...'Z' => char - 'A',
         'a'...'z' => char - 'a',
-        '1'...'9' => char - '0' + 'a',
         else => unreachable,
     };
 }
 
 // Create a union type to hold pointer instead of duplicated value
-const TreeOrValue = union(enum) { tree: *NumericTree, value: u8 };
+const TreeOrValue = union(enum) { tree: *NumericTree, value: u4 };
 
-pub fn solve(filepath: []const u8, comptime allocator: Allocator) !u32 {
+pub fn calcLine(list: *const LinkedList(TreeOrValue)) u7 {
+    var lead: u7 = 0; // Value range (0..128). We only need (10..90)
+    var tail: u4 = 0; // Value range (0..16). We only need (1..9)
+
+    var count: usize = 0;
+    var iter = list.head;
+    while (iter) |node| {
+        iter = node.next;
+        switch (node.value) {
+            .value => |value| {
+                lead = if (lead == 0) value else lead;
+                tail = value;
+            },
+            .tree => {},
+        }
+        count += 1;
+    }
+    std.debug.print("==================== LEAD({d})|TAIL({d})|NUM({d})|COUNT({d}) ====================\n", .{ lead, tail, lead * 10 + tail, count });
+
+    return lead * 10 + tail;
+}
+
+pub fn solve(filepath: []const u8, comptime allocator: Allocator) !usize {
     const file = try fs.cwd().openFile(filepath, .{ .mode = .read_only });
     var buffer = try allocator.alloc(u8, 512);
     defer {
@@ -106,6 +125,7 @@ pub fn solve(filepath: []const u8, comptime allocator: Allocator) !u32 {
         allocator.free(buffer);
     }
 
+    var total: usize = 0;
     var tree = try NumericTree.init(allocator);
     var list = LinkedList(TreeOrValue).init(allocator);
     defer {
@@ -113,19 +133,16 @@ pub fn solve(filepath: []const u8, comptime allocator: Allocator) !u32 {
         list.deinit();
     }
 
-    var total: u32 = 0;
-    var lead: u8 = 0;
-    var tail: u8 = 0;
     while (file.read(buffer)) |max_length| {
         if (max_length == 0) {
-            total += lead * 10 + tail;
+            total += calcLine(&list);
             break;
         }
 
         for (buffer[0..max_length]) |char| switch (char) {
             'a'...'z', 'A'...'Z' => {
                 const hashed = hash(char);
-                std.debug.print("{c} - ", .{char});
+                std.debug.print("Character {c}:\n", .{char});
 
                 var index: u8 = 0;
                 var iter = list.head;
@@ -141,14 +158,12 @@ pub fn solve(filepath: []const u8, comptime allocator: Allocator) !u32 {
                                 }
                                 index += 1;
                             } else {
+                                // No possible number can be create with this path
+                                // so we remove it
                                 try list.remove(index);
-                                if (index == list.size) index -= 1;
                             }
                         },
-                        .value => |value| {
-                            _ = value;
-                            index += 1;
-                        },
+                        .value => index += 1, // This node already infered to numeric value. skip
                     }
                 }
 
@@ -157,27 +172,21 @@ pub fn solve(filepath: []const u8, comptime allocator: Allocator) !u32 {
                 }
             },
             '0'...'9' => {
-                try list.insert(list.size, .{ .value = char - '0' });
+                std.debug.print("Character {c}:\n", .{char});
+                var index: u8 = 0;
+                var iter = list.head;
+                while (iter) |treeOrVal| {
+                    iter = treeOrVal.next;
+                    switch (treeOrVal.value) {
+                        .tree => try list.remove(index), // Remove in-complete number
+                        .value => index += 1,
+                    }
+                }
+                try list.insert(list.size, .{ .value = @as(u4, @intCast(char - '0')) });
             },
             '\n' => {
-                var count: u8 = 0;
-                var iter = list.head;
-                while (iter) |node| {
-                    iter = node.next;
-                    switch (node.value) {
-                        .value => |value| {
-                            lead = if (lead == 0) value else lead;
-                            tail = value;
-                        },
-                        .tree => {},
-                    }
-                    count += 1;
-                }
-                std.debug.print("LEAD({d})|TAIL({d})|NUM({d})|COUNT({d})\n", .{ lead, tail, lead * 10 + tail, count });
-                total += (lead * 10) + tail;
-                lead = 0;
-                tail = 0;
-                list.clear();
+                total += calcLine(&list);
+                list.clear(); // Clear the list, prepare for next line
             },
             else => unreachable,
         };
